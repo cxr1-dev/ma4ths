@@ -1,4 +1,6 @@
 #include "vec.h"
+#include "const.h"
+#include <iostream>
 using namespace m4ths::vec;
 int main() {
 	two_d_vec v, w;
@@ -8,5 +10,6 @@ int main() {
 	op::print_2d_vec(
 		op::two_d_vec_add(v,w)
 	);
+	std::cout << pi << '\n' << e;
 	return 0;
 }
