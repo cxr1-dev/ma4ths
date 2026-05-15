@@ -1,15 +1,11 @@
-#include "vec.h"
-#include "const.h"
 #include <iostream>
-using namespace m4ths::vec;
-int main() {
-	two_d_vec v, w;
-	v = op::init_2d_vec(1, 2);
-	w = op::init_2d_vec(2, 0);
+#include "vec.h"
+using namespace m4ths;
 
-	op::print_2d_vec(
-		op::two_d_vec_add(v,w)
-	);
-	std::cout << pi << '\n' << e;
+int main() {
+	auto v = vec::newv(1, 2);
+	auto w = vec::newv(3, 4);
+	std::cout << v + w << '\n';
+	std::cout << v - w << '\n';
 	return 0;
 }
