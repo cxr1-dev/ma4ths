@@ -1,10 +1,12 @@
-# m4ths——基于C++的线性代数计算库
-作者：Cxr1  
-最新更新时间：2026.5.16 UTC+8:00
-## 主要功能
-- 矩阵`m4ths::mat`
-- 向量`m4ths::vec`
-- 常数`m4ths::con`
+![repo](https://img.shields.io/badge/cxr1--dev-m4ths-blue?logo=github)
+![lang](https://img.shields.io/badge/By-C++-green?logo=cplusplus)
+# m4ths——A linear algebra calculation lib by C++
+Author: Cxr1  
+Latest Update：2026.5.16 UTC+8:00
+## Features
+- Matrix`m4ths::mat`
+- Vector`m4ths::vec`
+- Constant`m4ths::con`
 ## `m4ths::mat`
 ### 1.`struct mat`
 ```cpp
@@ -39,4 +41,4 @@ static auto newv(Args...args) {
 }
 ```
 ## `m4ths::con`
-没啥好说的，自己看代码去吧
+None I wanna say, see code plz.
