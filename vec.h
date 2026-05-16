@@ -2,7 +2,7 @@
 #include "m4ths.h"
 #include <iostream>
 
-namespace vec{
+namespace m4ths::vec{
 	template <unsigned short D>
 	struct vec {
 		static constexpr unsigned short d = D; // 向量维数
