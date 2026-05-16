@@ -1,8 +1,6 @@
 ﻿  main.cpp
-D:\VisualStudioRepos\m4ths\vec.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-  (编译源文件“main.cpp”)
-  
-D:\VisualStudioRepos\m4ths\mat.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\VisualStudioRepos\m4ths\main.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\VisualStudioRepos\m4ths\include\vec.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   (编译源文件“main.cpp”)
   
   m4ths.vcxproj -> D:\VisualStudioRepos\m4ths\x64\Debug\m4ths.exe

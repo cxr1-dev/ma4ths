@@ -1,6 +1,15 @@
+/*
+ ██████╗██╗  ██╗██████╗  ██╗
+██╔════╝╚██╗██╔╝██╔══██╗███║
+██║      ╚███╔╝ ██████╔╝╚██║
+██║      ██╔██╗ ██╔══██╗ ██║
+╚██████╗██╔╝ ██╗██║  ██║ ██║
+ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═╝
+*/
+
 #include <iostream>
 #include <cstdio>
-#include "m4ths.h"
+#include "include/m4ths.h"
 using namespace m4ths;
 
 int main() {
@@ -20,15 +29,18 @@ int main() {
 	/* ostream Test Meow~ */
 	std::cout << "\033[36m";
 	printf("[[[VECTOR TEST]]]\n");
-	std::cout << "\033[0m";
 	std::cout << v + w << '\n';
 	std::cout << v - w << '\n';
-	std::cout << "\033[36m";
 	printf("------------------\n");
 	std::cout << "\033[34m";
 	printf("[[[MATRIX TEST]]]\n");
 	std::cout << a + b << '\n';
 	std::cout << a - b << "\n";
+	printf("------------------\n");
+	std::cout << "\033[32m";
+	printf("[[[MUITI TEST]]]\n");
+	std::cout << vec::num_mul_vec(2, v) << '\n';
+	std::cout << mat_mul_vec(a, v) << '\n';
 	printf("------------------\n");
 	std::cout << "\033[33m";
 	printf("[[[CONSTANT TEST]]]\n");

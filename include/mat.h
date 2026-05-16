@@ -1,13 +1,14 @@
-#pragma once
+﻿#pragma once
 #include "m4ths.h"
 #include <iostream>
+#include "vec.h"
 
 namespace m4ths::mat {
 	template <unsigned short ROW,unsigned short COL>
 	struct mat{
-		static constexpr unsigned short row = ROW;
-		static constexpr unsigned short col = COL;
-		double value[row][col] = { 0 };
+		static constexpr unsigned short row = ROW; // 行
+		static constexpr unsigned short col = COL; // 列
+		double value[row][col] = { 0 }; // 内容
 		mat() : value{0} {}
 		
 		template<typename... Args>

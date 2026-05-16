@@ -51,6 +51,16 @@ namespace m4ths::vec{
 		return os;
 	}
 
+	template <unsigned short D>
+	static vec<D> num_mul_vec(double a, vec<D> v) { // 向量数乘
+		vec<D> result;
+
+		for (unsigned short i = 0; i < D; i++) {
+			result.value[i] = a * v.value[i];
+		}
+		return result;
+	}
+
 	template<typename... Args>
 	static auto newv(Args...args) { // 通过动态参数数量实现对vec的赋值
 		vec<sizeof...(args)>v(args...);
