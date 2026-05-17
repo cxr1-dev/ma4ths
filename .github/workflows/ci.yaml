@@ -1,4 +1,4 @@
-# msvc倒是过了，但是gcc和clang你俩POSIX上都能过，win为啥过不了😡💢
+# 算了算了直接把gcc/clang on win删了
 name: Build main.cpp
 
 on:
@@ -17,10 +17,16 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         compiler: [gcc, clang, msvc]
         exclude:
+          # MSVC 只在 Windows 上运行
           - compiler: msvc
             os: ubuntu-latest
           - compiler: msvc
             os: macos-latest
+          # GCC 和 Clang 不在 Windows 上运行
+          - compiler: gcc
+            os: windows-latest
+          - compiler: clang
+            os: windows-latest
 
     steps:
       - name: Checkout code
@@ -39,6 +45,8 @@ jobs:
       - name: Install GCC (macOS)
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
+
+      # macOS 自带 clang，无需安装
 
       # ---------- Windows MSVC 环境 ----------
       - name: Set up MSVC
@@ -68,15 +76,8 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           Write-Host "Current directory: $(Get-Location)"
-          Write-Host "Files in directory:"
+          Write-Host "Files:"
           Get-ChildItem
-          Write-Host "Searching for main.exe:"
-          if (Test-Path .\main.exe) {
-            Write-Host "main.exe found" -ForegroundColor Green
-          } else {
-            Write-Host "main.exe NOT found" -ForegroundColor Red
-            Get-ChildItem -Filter *.exe
-          }
         shell: powershell
 
       # ---------- 运行程序（Unix）----------
@@ -88,14 +89,7 @@ jobs:
       # ---------- 运行程序（Windows）----------
       - name: Run executable (Windows)
         if: runner.os == 'Windows'
-        run: |
-          if (Test-Path .\main.exe) {
-            .\main.exe
-          } else {
-            Write-Error "main.exe not found in $PWD"
-            Get-ChildItem
-            exit 1
-          }
+        run: .\main.exe
         shell: powershell
 
       # ---------- 上传可执行文件 ----------
