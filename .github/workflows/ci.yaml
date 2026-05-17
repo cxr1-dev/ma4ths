@@ -22,9 +22,6 @@ jobs:
             os: ubuntu-latest
           - compiler: msvc
             os: macos-latest
-          # Clang 只在 Linux 和 macOS 上运行
-          - compiler: clang
-            os: windows-latest
 
     steps:
       - name: 验证代码
@@ -58,6 +55,13 @@ jobs:
           winget install gcc
           refreshenv
 
+      # ---------- Windows Clang 环境 ----------
+      - name: 配置 Clang (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'clang'
+        run: |
+          winget install llvm
+          refreshenv
+
       # ---------- 编译（Unix）----------
       - name: 使用 GCC/Clang 编译 (Unix)
         if: runner.os != 'Windows'
@@ -83,14 +87,21 @@ jobs:
           g++ -std=c++17 -o main.exe main.cpp
         shell: powershell
 
-      # ---------- 列出编译产物（Windows 调试）----------
-      - name: 列出编译产物 (Windows)
-        if: runner.os == 'Windows'
+      # ---------- 编译（Windows Clang）----------
+      - name: 使用 Clang 编译 (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'clang'
         run: |
-          Write-Host "Current directory: $(Get-Location)"
-          Write-Host "Files:"
-          Get-ChildItem
+          clang++ -std=c++17 -o main.exe main.cpp
         shell: powershell
+
+      # # ---------- 列出编译产物（Windows 调试）----------
+      # - name: 列出编译产物 (Windows)
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     Write-Host "当前目录: $(Get-Location)"
+      #     Write-Host "文件:"
+      #     Get-ChildItem
+      #   shell: powershell
 
       # ---------- 运行程序（Unix）----------
       - name: 运行程序 (Unix)
