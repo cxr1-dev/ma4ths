@@ -22,39 +22,44 @@ jobs:
             os: ubuntu-latest
           - compiler: msvc
             os: macos-latest
-          # GCC 和 Clang 不在 Windows 上运行
-          - compiler: gcc
-            os: windows-latest
+          # Clang 只在 Linux 和 macOS 上运行
           - compiler: clang
             os: windows-latest
 
     steps:
-      - name: Checkout code
+      - name: 验证代码
         uses: actions/checkout@v4
 
       # ---------- Linux 编译器 ----------
-      - name: Install GCC (Linux)
+      - name: 安装 GCC (Linux)
         if: runner.os == 'Linux' && matrix.compiler == 'gcc'
         run: sudo apt-get update && sudo apt-get install -y g++
 
-      - name: Install Clang (Linux)
+      - name: 安装 Clang (Linux)
         if: runner.os == 'Linux' && matrix.compiler == 'clang'
         run: sudo apt-get update && sudo apt-get install -y clang
 
       # ---------- macOS 编译器 ----------
-      - name: Install GCC (macOS)
+      - name: 安装 GCC (macOS)
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
 
       # macOS 自带 clang，无需安装
 
       # ---------- Windows MSVC 环境 ----------
-      - name: Set up MSVC
+      - name: 配置 MSVC
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         uses: ilammy/msvc-dev-cmd@v1
 
+      # ---------- Windows GCC 环境 ----------
+      - name: 配置 GCC (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'gcc'
+        run: |
+          winget install gcc
+          refreshenv
+
       # ---------- 编译（Unix）----------
-      - name: Compile with GCC/Clang (Unix)
+      - name: 使用 GCC/Clang 编译 (Unix)
         if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.compiler }}" = "gcc" ]; then
@@ -66,13 +71,20 @@ jobs:
         shell: bash
 
       # ---------- 编译（Windows MSVC）----------
-      - name: Compile with MSVC (Windows)
+      - name: 使用 MSVC 编译 (Windows)
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         run: cl /std:c++17 /Fe:main.exe main.cpp
         shell: powershell
 
+      # ---------- 编译（Windows GCC）----------
+      - name: 使用 GCC 编译 (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'gcc'
+        run: |
+          g++ -std=c++17 -o main.exe main.cpp
+        shell: powershell
+
       # ---------- 列出编译产物（Windows 调试）----------
-      - name: List generated files (Windows)
+      - name: 列出编译产物 (Windows)
         if: runner.os == 'Windows'
         run: |
           Write-Host "Current directory: $(Get-Location)"
@@ -81,19 +93,19 @@ jobs:
         shell: powershell
 
       # ---------- 运行程序（Unix）----------
-      - name: Run executable (Unix)
+      - name: 运行程序 (Unix)
         if: runner.os != 'Windows'
         run: ./main
         shell: bash
 
       # ---------- 运行程序（Windows）----------
-      - name: Run executable (Windows)
+      - name: 运行程序 (Windows)
         if: runner.os == 'Windows'
         run: .\main.exe
         shell: powershell
 
       # ---------- 上传可执行文件 ----------
-      - name: Upload artifact
+      - name: 上传编译产物
         uses: actions/upload-artifact@v4
         with:
           name: main-${{ matrix.os }}-${{ matrix.compiler }}
