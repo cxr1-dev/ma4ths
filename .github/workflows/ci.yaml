@@ -1,0 +1,61 @@
+# genated by ChatGPT5.5
+name: Build Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        compiler: [gcc, clang, msvc]
+        exclude:
+          # MSVC 只跑在 Windows
+          - os: ubuntu-latest
+            compiler: msvc
+          - os: macos-latest
+            compiler: msvc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up compiler
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            if [[ "${{ matrix.compiler }}" == "gcc" ]]; then
+              sudo apt-get install -y g++
+            elif [[ "${{ matrix.compiler }}" == "clang" ]]; then
+              sudo apt-get install -y clang
+            fi
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            if [[ "${{ matrix.compiler }}" == "gcc" ]]; then
+              brew install gcc
+            elif [[ "${{ matrix.compiler }}" == "clang" ]]; then
+              echo "Clang is preinstalled on macOS"
+            fi
+          fi
+        shell: bash
+
+      - name: Configure and Build
+        run: |
+          mkdir -p build
+          cd build
+          if [[ "${{ matrix.os }}" == "windows-latest" && "${{ matrix.compiler }}" == "msvc" ]]; then
+            cmake .. -G "Visual Studio 17 2022"
+            cmake --build . --config Release
+          else
+            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+            cmake --build .
+          fi
+        shell: bash
+
+      - name: List build artifacts
+        run: ls -R build
+        shell: bash
