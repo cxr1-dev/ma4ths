@@ -1,4 +1,4 @@
-# 他妈的没完了是吧，傻逼🤬
+# msvc倒是过了，但是gcc和clang你俩POSIX上都能过，win为啥过不了😡💢
 name: Build main.cpp
 
 on:
@@ -45,7 +45,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         uses: ilammy/msvc-dev-cmd@v1
 
-      # ---------- 编译（Unix：g++/clang++ 使用 -std=c++17）----------
+      # ---------- 编译（Unix）----------
       - name: Compile with GCC/Clang (Unix)
         if: runner.os != 'Windows'
         run: |
@@ -57,27 +57,45 @@ jobs:
           $CXX -std=c++17 -o main main.cpp
         shell: bash
 
-      # ---------- 编译（Windows MSVC：添加 /std:c++17）----------
+      # ---------- 编译（Windows MSVC）----------
       - name: Compile with MSVC (Windows)
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         run: cl /std:c++17 /Fe:main.exe main.cpp
         shell: powershell
 
-      # ---------- 验证可执行文件是否存在（Windows）----------
-      - name: List files (Windows)
+      # ---------- 列出编译产物（Windows 调试）----------
+      - name: List generated files (Windows)
         if: runner.os == 'Windows'
-        run: Get-ChildItem
+        run: |
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Files in directory:"
+          Get-ChildItem
+          Write-Host "Searching for main.exe:"
+          if (Test-Path .\main.exe) {
+            Write-Host "main.exe found" -ForegroundColor Green
+          } else {
+            Write-Host "main.exe NOT found" -ForegroundColor Red
+            Get-ChildItem -Filter *.exe
+          }
         shell: powershell
 
-      # ---------- 运行程序 ----------
+      # ---------- 运行程序（Unix）----------
       - name: Run executable (Unix)
         if: runner.os != 'Windows'
         run: ./main
         shell: bash
 
+      # ---------- 运行程序（Windows）----------
       - name: Run executable (Windows)
         if: runner.os == 'Windows'
-        run: .\main.exe
+        run: |
+          if (Test-Path .\main.exe) {
+            .\main.exe
+          } else {
+            Write-Error "main.exe not found in $PWD"
+            Get-ChildItem
+            exit 1
+          }
         shell: powershell
 
       # ---------- 上传可执行文件 ----------
