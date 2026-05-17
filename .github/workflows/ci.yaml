@@ -1,4 +1,4 @@
-# 傻逼Windows，真tm受不了这个b系统，还有这个old cmd😡FUCK YOU WINDOWS!!!
+# 他妈的没完了是吧，傻逼🤬
 name: Build main.cpp
 
 on:
@@ -40,14 +40,12 @@ jobs:
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
 
-      # macOS 自带 clang，无需安装
-
       # ---------- Windows MSVC 环境 ----------
       - name: Set up MSVC
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         uses: ilammy/msvc-dev-cmd@v1
 
-      # ---------- 编译 ----------
+      # ---------- 编译（Unix：g++/clang++ 使用 -std=c++17）----------
       - name: Compile with GCC/Clang (Unix)
         if: runner.os != 'Windows'
         run: |
@@ -56,13 +54,14 @@ jobs:
           else
             CXX=clang++
           fi
-          $CXX -o main main.cpp
+          $CXX -std=c++17 -o main main.cpp
         shell: bash
 
+      # ---------- 编译（Windows MSVC：添加 /std:c++17）----------
       - name: Compile with MSVC (Windows)
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
-        run: cl /Fe:main.exe main.cpp
-        shell: powershell   # 改用 PowerShell，更稳定
+        run: cl /std:c++17 /Fe:main.exe main.cpp
+        shell: powershell
 
       # ---------- 验证可执行文件是否存在（Windows）----------
       - name: List files (Windows)
@@ -78,7 +77,7 @@ jobs:
 
       - name: Run executable (Windows)
         if: runner.os == 'Windows'
-        run: .\main.exe         # PowerShell 中执行
+        run: .\main.exe
         shell: powershell
 
       # ---------- 上传可执行文件 ----------
