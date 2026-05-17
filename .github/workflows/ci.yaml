@@ -1,5 +1,5 @@
-# fix again
-name: Build Test
+# Fix again again
+name: Build main.cpp
 
 on:
   push:
@@ -26,49 +26,60 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---------- Linux 编译器准备 ----------
+      # ---------- Linux 准备编译器 ----------
       - name: Install GCC (Linux)
         if: runner.os == 'Linux' && matrix.compiler == 'gcc'
-        run: sudo apt-get update && sudo apt-get install -y g++ gcc
+        run: sudo apt-get update && sudo apt-get install -y g++
 
       - name: Install Clang (Linux)
         if: runner.os == 'Linux' && matrix.compiler == 'clang'
         run: sudo apt-get update && sudo apt-get install -y clang
 
-      # ---------- macOS 编译器准备 ----------
+      # ---------- macOS 准备编译器 ----------
       - name: Install GCC (macOS)
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
 
-      # macOS 自带 clang，无需额外安装
+      # macOS 自带 clang，无需安装
 
       # ---------- Windows MSVC 准备 ----------
-      - name: Add MSVC to PATH
+      - name: Set up MSVC
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         uses: ilammy/msvc-dev-cmd@v1
 
-      # ---------- CMake 配置 ----------
-      - name: Configure CMake
+      # ---------- 编译 ----------
+      - name: Compile with GCC/Clang (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          cmake -B build -S . `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'msvc' && 'cl' || matrix.compiler }}
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            CXX=g++
+          else
+            CXX=clang++
+          fi
+          $CXX -o main main.cpp
         shell: bash
 
-      # ---------- 编译 ----------
-      - name: Build
-        run: cmake --build build --config Release --parallel
+      - name: Compile with MSVC (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'msvc'
+        run: cl /Fe:main.exe main.cpp
+        shell: cmd
 
-      # ---------- 可选：运行测试 ----------
-      - name: Run tests
-        working-directory: build
-        run: ctest --output-on-failure -C Release
-        continue-on-error: true   # 如果你的项目还没有测试，可先忽略失败
+      # ---------- 运行程序（可选） ----------
+      - name: Run executable (Unix)
+        if: runner.os != 'Windows'
+        run: ./main
+        shell: bash
 
-      # ---------- 上传构建产物（便于调试）----------
-      - name: Upload artifacts
+      - name: Run executable (Windows)
+        if: runner.os == 'Windows'
+        run: .\main.exe
+        shell: cmd
+
+      # ---------- 上传可执行文件（便于下载） ----------
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}-${{ matrix.compiler }}
-          path: build/
-        if: always()
+          name: main-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            main
+            main.exe
