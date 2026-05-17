@@ -1,16 +1,18 @@
-# fix by deepseek
+# fix again
 name: Build Test
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         compiler: [gcc, clang, msvc]
@@ -19,45 +21,54 @@ jobs:
             os: ubuntu-latest
           - compiler: msvc
             os: macos-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up compiler (Linux)
-        if: runner.os == 'Linux'
+      # ---------- Linux 编译器准备 ----------
+      - name: Install GCC (Linux)
+        if: runner.os == 'Linux' && matrix.compiler == 'gcc'
+        run: sudo apt-get update && sudo apt-get install -y g++ gcc
+
+      - name: Install Clang (Linux)
+        if: runner.os == 'Linux' && matrix.compiler == 'clang'
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      # ---------- macOS 编译器准备 ----------
+      - name: Install GCC (macOS)
+        if: runner.os == 'macOS' && matrix.compiler == 'gcc'
+        run: brew install gcc
+
+      # macOS 自带 clang，无需额外安装
+
+      # ---------- Windows MSVC 准备 ----------
+      - name: Add MSVC to PATH
+        if: runner.os == 'Windows' && matrix.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # ---------- CMake 配置 ----------
+      - name: Configure CMake
         run: |
-          if [[ "${{ matrix.compiler }}" == "gcc" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y g++
-          elif [[ "${{ matrix.compiler }}" == "clang" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y clang
-          fi
+          cmake -B build -S . `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'msvc' && 'cl' || matrix.compiler }}
         shell: bash
 
-      - name: Set up compiler (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          if [[ "${{ matrix.compiler }}" == "gcc" ]]; then
-            brew install gcc
-          elif [[ "${{ matrix.compiler }}" == "clang" ]]; then
-            echo "Clang is preinstalled on macOS"
-          fi
-        shell: bash
+      # ---------- 编译 ----------
+      - name: Build
+        run: cmake --build build --config Release --parallel
 
-      - name: Configure and Build
-        run: |
-          mkdir -p build
-          cd build
-          if [[ "${{ runner.os }}" == "Windows" && "${{ matrix.compiler }}" == "msvc" ]]; then
-            cmake .. -G "Visual Studio 17 2022"
-            cmake --build . --config Release
-          else
-            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
-            cmake --build .
-          fi
-        shell: bash
+      # ---------- 可选：运行测试 ----------
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure -C Release
+        continue-on-error: true   # 如果你的项目还没有测试，可先忽略失败
 
-      - name: List build artifacts
-        run: ls -R build
-        shell: bash
+      # ---------- 上传构建产物（便于调试）----------
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}-${{ matrix.compiler }}
+          path: build/
+        if: always()
