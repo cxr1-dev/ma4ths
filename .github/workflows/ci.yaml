@@ -1,4 +1,4 @@
-# Fix again again
+# 傻逼Windows，真tm受不了这个b系统，还有这个old cmd😡FUCK YOU WINDOWS!!!
 name: Build main.cpp
 
 on:
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---------- Linux 准备编译器 ----------
+      # ---------- Linux 编译器 ----------
       - name: Install GCC (Linux)
         if: runner.os == 'Linux' && matrix.compiler == 'gcc'
         run: sudo apt-get update && sudo apt-get install -y g++
@@ -35,20 +35,20 @@ jobs:
         if: runner.os == 'Linux' && matrix.compiler == 'clang'
         run: sudo apt-get update && sudo apt-get install -y clang
 
-      # ---------- macOS 准备编译器 ----------
+      # ---------- macOS 编译器 ----------
       - name: Install GCC (macOS)
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
 
       # macOS 自带 clang，无需安装
 
-      # ---------- Windows MSVC 准备 ----------
+      # ---------- Windows MSVC 环境 ----------
       - name: Set up MSVC
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         uses: ilammy/msvc-dev-cmd@v1
 
       # ---------- 编译 ----------
-      - name: Compile with GCC/Clang (Linux/macOS)
+      - name: Compile with GCC/Clang (Unix)
         if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.compiler }}" = "gcc" ]; then
@@ -62,9 +62,15 @@ jobs:
       - name: Compile with MSVC (Windows)
         if: runner.os == 'Windows' && matrix.compiler == 'msvc'
         run: cl /Fe:main.exe main.cpp
-        shell: cmd
+        shell: powershell   # 改用 PowerShell，更稳定
 
-      # ---------- 运行程序（可选） ----------
+      # ---------- 验证可执行文件是否存在（Windows）----------
+      - name: List files (Windows)
+        if: runner.os == 'Windows'
+        run: Get-ChildItem
+        shell: powershell
+
+      # ---------- 运行程序 ----------
       - name: Run executable (Unix)
         if: runner.os != 'Windows'
         run: ./main
@@ -72,10 +78,10 @@ jobs:
 
       - name: Run executable (Windows)
         if: runner.os == 'Windows'
-        run: .\main.exe
-        shell: cmd
+        run: .\main.exe         # PowerShell 中执行
+        shell: powershell
 
-      # ---------- 上传可执行文件（便于下载） ----------
+      # ---------- 上传可执行文件 ----------
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
